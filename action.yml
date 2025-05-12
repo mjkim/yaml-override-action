@@ -1,0 +1,26 @@
+name: "YAML value override"
+description: "YAML value override with YQ"
+inputs:
+  values:
+    description: "values file"
+    default: "values.yaml"
+  template:
+    description: "values for override"
+runs:
+  using: "composite"
+  steps:
+    - name: value change
+      shell: bash
+      run: |
+        REPLACE_VALUES="$(mktemp "$RUNNER_TEMP/template.XXXXXXX")"
+        TMP_LINE="$(mktemp "$RUNNER_TEMP/line.XXXXXXX")"
+        cat <<'EOF' > $REPLACE_VALUES
+          ${{ inputs.template }}
+        EOF
+
+        while IFS= read -r line; do
+          trimmed=$(echo "$line" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+
+          echo $line > $TMP_LINE
+          ${{ github.action_path }}/yq_linux_amd64 --from-file $TMP_LINE -i ${{ inputs.values }}
+        done < $REPLACE_VALUES
