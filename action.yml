@@ -1,26 +1,17 @@
 name: "YAML value override"
-description: "YAML value override with YQ"
+description: "YAML value override"
 inputs:
-  values:
-    description: "values file"
+  file:
+    description: "file to change"
     default: "values.yaml"
-  template:
+  values:
     description: "values for override"
+  type:
+    default: yaml
+    enum:
+      - yaml
+      - yq
+      - yq_multiline
 runs:
-  using: "composite"
-  steps:
-    - name: value change
-      shell: bash
-      run: |
-        REPLACE_VALUES="$(mktemp "$RUNNER_TEMP/template.XXXXXXX")"
-        TMP_LINE="$(mktemp "$RUNNER_TEMP/line.XXXXXXX")"
-        cat <<'EOF' > $REPLACE_VALUES
-          ${{ inputs.template }}
-        EOF
-
-        while IFS= read -r line; do
-          trimmed=$(echo "$line" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-
-          echo $line > $TMP_LINE
-          ${{ github.action_path }}/yq_linux_amd64 --from-file $TMP_LINE -i ${{ inputs.values }}
-        done < $REPLACE_VALUES
+  using: "node20"
+  main: "index.js"

@@ -1,34 +1,69 @@
 # YAML Value Override GitHub Action
 
-Override values in your YAML file using [yq](https://github.com/mikefarah/yq) with a simple GitHub Action.
+Override values in your YAML file using [yq](https://github.com/mikefarah/yq) or native YAML parsing with a simple GitHub Action.
 
 ## Features
 
-- Override any value in a YAML file using a concise template syntax.
-- Powered by `yq` for robust YAML processing.
-- Easy to use in your CI/CD workflows.
+- Override any value in a YAML file using different methods
+- Multiple processing types available: native YAML parsing or yq processing
+- Easy to use in your CI/CD workflows
 
 ## Inputs
 
 | Name      | Description                | Required | Default        |
 |-----------|----------------------------|----------|----------------|
-| `values`  | Path to the YAML file to override | No       | `values.yaml`  |
-| `template`| Override instructions (one per line, yq syntax) | Yes      |                |
+| `file`    | Path to the YAML file to override | Yes      |               |
+| `values`  | Override values (format depends on type) | Yes      |               |
+| `type`    | Processing type (`yaml`, `yq`, or `yq_multiline`) | No      |  yaml         |
 
-## Usage
+## Processing Types
+
+This action supports three different methods for overriding YAML values:
+
+### 1. `yaml` Type
+
+Uses JavaScript's YAML parser to directly modify the file structure. The `values` input should be a valid YAML string with dot-notation keys.
 
 ```yaml
-- uses: mjkim/yaml-override-action@v0
+- uses: mjkim/yaml-override-action@v1
   with:
-    template: |
+    file: values.yaml
+    values: |
+      key.nested: value
+      foo: bar
+      image.tag: ubuntu:latest
+    type: yaml
+```
+
+### 2. `yq` Type
+
+Processes each line of input as a separate yq expression. Each line is executed as an individual command.
+
+```yaml
+- uses: mjkim/yaml-override-action@v1
+  with:
+    file: values.yaml
+    values: |
       .key="value"
       .foo="bar"
       .image.tag="ubuntu:latest"
-    values: values.yaml
+    type: yq
 ```
 
-- `template`: Each line should be a yq expression for overriding a value.
-- `values`: (Optional) Path to your YAML file. Defaults to `values.yaml`.
+### 3. `yq_multiline` Type
+
+Processes the entire input as a single multiline yq expression.
+
+```yaml
+- uses: mjkim/yaml-override-action@v1
+  with:
+    file: values.yaml
+    values: |
+      .key="value" |
+      .foo="bar" |
+      .image.tag="ubuntu:latest"
+    type: yq_multiline
+```
 
 ## Example
 
@@ -41,7 +76,7 @@ image:
   tag: oldtag
 ```
 
-After running the action with the above example, your `values.yaml` will be:
+After running the action with any of the examples above, your `values.yaml` will be:
 
 ```yaml
 key: value
@@ -50,7 +85,9 @@ image:
   tag: ubuntu:latest
 ```
 
-## Notes
+## Usage Notes
 
-- This action uses a statically built `yq` binary for Linux.
-- The action works on runners with bash and Linux environment.
+- The `yaml` type is suitable for simple modifications and doesn't require external tools
+- The `yq` types offer more powerful expressions but require the yq binary (included in the action)
+- For complex yq operations, consider using `yq_multiline` type
+- The action works on runners with bash and Linux environment

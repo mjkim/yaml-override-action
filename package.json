@@ -1,0 +1,27 @@
+{
+  "name": "yaml-override-action",
+  "version": "1.0.0",
+  "description": "Override values in your YAML file using [yq](https://github.com/mikefarah/yq) with a simple GitHub Action.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjkim/yaml-override-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mjkim/yaml-override-action/issues"
+  },
+  "homepage": "https://github.com/mjkim/yaml-override-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
+    "@octokit/rest": "^21.1.1",
+    "yaml": "^2.7.1"
+  }
+}
